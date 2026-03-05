@@ -1,0 +1,9 @@
+# WebView2 runtime cache (generated at runtime, not for distribution)
+dependencies/wall-renderer/wall-renderer/wall-renderer.exe.WebView2/
+
+# Runtime state
+Data/state.json
+
+# Logs
+*.log
+build_log.txt

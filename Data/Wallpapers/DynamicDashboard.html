@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: #0f0c29;
+            background: linear-gradient(to right, #24243e, #302b63, #0f0c29);
+            height: 100vh;
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .widget-container {
+            position: absolute;
+            bottom: 50px;
+            right: 50px;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(15px);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 300px;
+        }
+
+        .volume-row {
+            margin: 10px 0;
+        }
+
+        .device-name {
+            font-size: 0.8rem;
+            color: #aaa;
+            margin-bottom: 5px;
+        }
+
+        .bar-bg {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            background: #00d2ff;
+            transition: width 0.3s;
+        }
+
+        .clock {
+            font-size: 3rem;
+            font-weight: 300;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="widget-container">
+        <div class="clock" id="clock">00:00</div>
+        <div id="volume-widgets">
+            <p style="font-size: 0.7rem; color: #666;">LOADING VOLUME DATA...</p>
+        </div>
+    </div>
+
+    <script>
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').innerText =
+                now.getHours().toString().padStart(2, '0') + ":" +
+                now.getMinutes().toString().padStart(2, '0');
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        async function updateState() {
+            try {
+                const response = await fetch('../state.json');
+                const state = await response.json();
+
+                const vContainer = document.getElementById('volume-widgets');
+                vContainer.innerHTML = '<h4>System Volume Protections</h4>';
+
+                for (const [name, value] of Object.entries(state.volume)) {
+                    const row = document.createElement('div');
+                    row.className = 'volume-row';
+                    row.innerHTML = `
+                        <div class="device-name">${name}</div>
+                        <div class="bar-bg">
+                            <div class="bar-fill" style="width: ${value * 100}%"></div>
+                        </div>
+                    `;
+                    vContainer.appendChild(row);
+                }
+
+                if (state.mods && state.mods.length > 0) {
+                    const mHeader = document.createElement('h4');
+                    mHeader.innerText = 'Active Widget Mods';
+                    mHeader.style.marginTop = '20px';
+                    vContainer.appendChild(mHeader);
+
+                    state.mods.forEach(mod => {
+                        const mDiv = document.createElement('div');
+                        mDiv.style.fontSize = '0.8rem';
+                        mDiv.style.color = '#00d2ff';
+                        mDiv.style.margin = '5px 0';
+                        mDiv.innerText = '• ' + mod;
+                        vContainer.appendChild(mDiv);
+                    });
+                }
+            } catch (e) {
+                // Wait for file
+            }
+        }
+        setInterval(updateState, 2000);
+        updateState();
+    </script>
+</body>
+
+</html>
